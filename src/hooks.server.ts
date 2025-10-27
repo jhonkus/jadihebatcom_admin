@@ -197,7 +197,7 @@ const authMiddleware: Handle = async ({ event, resolve }) => {
 	const isLoggedIn = !!(locals.user && locals.authToken);
 	const pathname = url.pathname;
 
-	const protectedRoutes = ['/learning', '/profile', '/my-courses', '/settings', '/dashboard'];
+	const protectedRoutes = ['/learning', '/profile', '/admin', '/settings', '/dashboard'];
 	const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
 	const publicRoutes = ['/login', '/register', '/forgot-password'];
@@ -209,7 +209,7 @@ const authMiddleware: Handle = async ({ event, resolve }) => {
 	}
 
 	if (isPublicRoute && isLoggedIn) {
-		throw redirect(303, '/');
+		throw redirect(303, '/admin/lessons');
 	}
 
 	const response = await resolve(event);

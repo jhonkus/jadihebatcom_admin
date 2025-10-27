@@ -1,3 +1,29 @@
+/**
+ * Get full lesson hierarchy: Category -> Courses -> Sections -> Lessons
+ */
+export async function getLessonHierarchy() {
+	const { data: categories, error: catError } = await supabase
+		.from('categories')
+		.select(`
+			id, name, slug, is_active, sort_order,
+			courses: courses (
+				id, title, slug, status,
+				course_sections: course_sections (
+					id, title, slug, is_active, order_index,
+					lessons: lessons (
+						id, title, slug, is_active, order_index, content, estimated_duration, is_free
+					)
+				)
+			)
+		`)
+		.order('sort_order');
+
+	if (catError) {
+		console.error('Error fetching hierarchy:', catError);
+		return [];
+	}
+	return categories;
+}
 // src/lib/server/supabase-courses.ts - Course data access via Supabase
 import { supabase } from './db';
 import type { Category, Course, Section, Lesson, Enrollment, CourseInfo } from '$lib/types/course';
@@ -397,4 +423,41 @@ export async function getCourseProgress(
 	}
 
 	return data || [];
+}
+
+/**
+ * Create a new lesson
+ */
+export async function createLesson(lessonData: Partial<Lesson>): Promise<Lesson | null> {
+	const { data, error } = await supabase
+		.from('lessons')
+		.insert(lessonData)
+		.select()
+		.single();
+
+	if (error) {
+		console.error('Error creating lesson:', error);
+		return null;
+	}
+
+	return data;
+}
+
+/**
+ * Update an existing lesson
+ */
+export async function updateLesson(lessonId: string, lessonData: Partial<Lesson>): Promise<Lesson | null> {
+	const { data, error } = await supabase
+		.from('lessons')
+		.update(lessonData)
+		.eq('id', lessonId)
+		.select()
+		.single();
+
+	if (error) {
+		console.error('Error updating lesson:', error);
+		return null;
+	}
+
+	return data;
 }

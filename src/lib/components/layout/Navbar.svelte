@@ -189,10 +189,10 @@
 					<li class="nav-item">
 						<a
 							class="nav-link"
-							class:active={$page.url.pathname.startsWith('/my-courses')}
-							href="/my-courses"
+							class:active={$page.url.pathname.startsWith('/admin')}
+							href="/admin/lessons"
 						>
-							Pembelajaran Saya
+							Admin Lessons
 						</a>
 					</li>
 				{/if}
@@ -257,13 +257,9 @@
 								<hr class="my-2" />
 
 								<!-- Menu Items -->
-								<a href="/profile" class="dropdown-item" onclick={closeUserMenu}>
-									<span class="me-2">👤</span>
-									Profil Saya
-								</a>
-								<a href="/my-courses" class="dropdown-item" onclick={closeUserMenu}>
+								<a href="/admin/lessons" class="dropdown-item" onclick={closeUserMenu}>
 									<span class="me-2">📚</span>
-									Pembelajaran Saya
+									Manage Lessons
 								</a>
 
 								<hr class="my-2" />

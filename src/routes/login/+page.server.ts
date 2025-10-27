@@ -142,7 +142,7 @@ export const actions: Actions = {
 				// console.error('Failed to fetch user info:', e);
 			}
 
-			throw redirect(303, '/my-courses');
+			throw redirect(303, '/admin/lessons');
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {

@@ -29,6 +29,9 @@ importers:
       '@types/pg':
         specifier: ^8.15.5
         version: 8.15.5
+      '@types/tinymce':
+        specifier: ^5.5.0
+        version: 5.5.0
       bootstrap:
         specifier: ^5.3.8
         version: 5.3.8(@popperjs/core@2.11.8)
@@ -53,6 +56,9 @@ importers:
       sanitize-html:
         specifier: ^2.11.1
         version: 2.17.0
+      tinymce:
+        specifier: ^8.2.0
+        version: 8.2.0
     devDependencies:
       '@eslint/compat':
         specifier: ^1.4.0
@@ -1485,6 +1491,10 @@ packages:
   '@types/phoenix@1.6.6':
     resolution: {integrity: sha512-PIzZZlEppgrpoT2QgbnDU+MMzuR6BbCjllj0bM70lWoejMeNJAxCchxnv7J3XFkI8MpygtRpzXrIlmWUBclP5A==}
 
+  '@types/tinymce@5.5.0':
+    resolution: {integrity: sha512-fOma8SV34kaHoiigF/RJ7/wbgv2B2DXtP51qTWn5nt2D2ubHFDTl/HKy/QmSgBxkdvpMNW9bng58cMsqgfQrUA==}
+    deprecated: This is a stub types definition. tinymce provides its own type definitions, so you do not need this installed.
+
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
@@ -2519,6 +2529,9 @@ packages:
   tinyglobby@0.2.15:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
+
+  tinymce@8.2.0:
+    resolution: {integrity: sha512-HZasRaAYQmePi+jjP4YFqHMtBJvbUaxDmjlXNf96uuyqsH6zZkGtJiFpsNi80Ec+L+snyF0OTDjrWVYDbkUrgQ==}
 
   tinypool@0.8.4:
     resolution: {integrity: sha512-i11VH5gS6IFeLY3gMBQ00/MmLncVP7JLXOw1vlgkytLmJK7QnEr7NXf0LBdxfmNPAeyetukOk0bOYrJrFGjYJQ==}
@@ -4321,6 +4334,10 @@ snapshots:
 
   '@types/phoenix@1.6.6': {}
 
+  '@types/tinymce@5.5.0':
+    dependencies:
+      tinymce: 8.2.0
+
   '@types/ws@8.18.1':
     dependencies:
       '@types/node': 22.18.11
@@ -5465,6 +5482,8 @@ snapshots:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
+
+  tinymce@8.2.0: {}
 
   tinypool@0.8.4: {}
 

@@ -1,5 +1,5 @@
 {
-	"name": "jadihebatdotcom",
+	"name": "jadihebatdotcom_admin",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
@@ -46,6 +46,7 @@
 		"@popperjs/core": "^2.11.8",
 		"@supabase/supabase-js": "^2.75.1",
 		"@types/pg": "^8.15.5",
+		"@types/tinymce": "^5.5.0",
 		"bootstrap": "^5.3.8",
 		"dompurify": "^2.4.0",
 		"dotenv": "^17.2.3",
@@ -53,6 +54,7 @@
 		"lucide-svelte": "^0.259.0",
 		"marked": "^16.4.0",
 		"pg": "^8.16.3",
-		"sanitize-html": "^2.11.1"
+		"sanitize-html": "^2.11.1",
+		"tinymce": "^8.2.0"
 	}
 }

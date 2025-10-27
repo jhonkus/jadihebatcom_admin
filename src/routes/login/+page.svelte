@@ -73,7 +73,7 @@
 							<div class="mb-3">
 								<div class="d-flex justify-content-between mb-2">
 									<label for="password" class="form-label mb-0">Password</label>
-									<a href="/forgot-password" class="small">Lupa password?</a>
+									<!-- Removed broken link to /forgot-password -->
 								</div>
 								<div class="position-relative">
 									<input
@@ -128,7 +128,7 @@
 							<div class="text-center">
 								<small class="text-secondary">
 									Belum punya akun?
-									<a href="/register" class="fw-semibold">Daftar sekarang</a>
+									<!-- Removed broken link to /register -->
 								</small>
 							</div>
 						</form>

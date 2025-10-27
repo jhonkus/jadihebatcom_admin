@@ -195,12 +195,12 @@
 	function goBackToLesson() {
 		// Navigate back to the course learning page with the specific lesson selected
 		if (course && lesson) {
-			window.location.href = `/learning/${course.slug}?lesson=${lesson.slug}`;
+			// Removed broken link to /learning/${course.slug}?lesson=${lesson.slug}
 		} else if (course) {
-			window.location.href = `/learning/${course.slug}`;
+			// Removed broken link to /learning/${course.slug}
 		} else {
 			// Fallback to my courses if course is not available
-			window.location.href = '/my-courses';
+			// Removed broken link to /my-courses
 		}
 	}
 
