@@ -1,10 +1,13 @@
 // src/lib/server/directus.ts - Admin operations only (no course data)
 import { createDirectus, rest, staticToken } from '@directus/sdk';
-import { API_BASE_URL, API_ADMIN_TOKEN } from '$env/static/private';
+import { env as privateEnv } from '$env/dynamic/private';
 
 export interface DirectusCollections {
 	// Only admin collections here - courses moved to Supabase
 }
+
+const API_BASE_URL = privateEnv.API_BASE_URL || '';
+const API_ADMIN_TOKEN = privateEnv.API_ADMIN_TOKEN || '';
 
 /**
  * Initialize Directus Client (admin only)

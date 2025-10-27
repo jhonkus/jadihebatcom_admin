@@ -1,6 +1,8 @@
 // src/hooks.server.ts - Hardened authentication middleware
 import { redirect, type Handle, type Cookies } from '@sveltejs/kit';
-import { API_BASE_URL } from '$env/static/private';
+import { env as privateEnv } from '$env/dynamic/private';
+
+const API_BASE_URL = privateEnv.API_BASE_URL || '';
 
 interface TokenResponse {
 	access_token: string;

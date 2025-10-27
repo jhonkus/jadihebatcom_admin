@@ -1,6 +1,10 @@
 // src/lib/server/directus-admin.ts - Admin Operations (User Registration, etc)
 import { createDirectus, rest, staticToken } from '@directus/sdk';
-import { API_ADMIN_TOKEN, API_BASE_URL, API_DEFAULT_ROLE_ID } from '$env/static/private';
+import { env as privateEnv } from '$env/dynamic/private';
+
+const API_BASE_URL = privateEnv.API_BASE_URL || '';
+const API_ADMIN_TOKEN = privateEnv.API_ADMIN_TOKEN || '';
+const API_DEFAULT_ROLE_ID = privateEnv.API_DEFAULT_ROLE_ID || '';
 
 // Validation
 if (!API_BASE_URL) {

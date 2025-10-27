@@ -1,6 +1,6 @@
 // src/routes/logout/+server.ts - PERBAIKI
 import { json } from '@sveltejs/kit';
-import { API_BASE_URL } from '$env/static/private';
+import { env as privateEnv } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ cookies, locals }) => {
@@ -20,6 +20,7 @@ export const POST: RequestHandler = async ({ cookies, locals }) => {
 		});
 
 		// Optional: Invalidate token di Directus
+		const API_BASE_URL = privateEnv.API_BASE_URL || '';
 		if (locals.authToken && API_BASE_URL) {
 			try {
 				await fetch(`${API_BASE_URL}/auth/logout`, {
