@@ -5,26 +5,81 @@
 	import { browser } from '$app/environment';
 
 	// TinyMCE configuration
+	const TINYMCE_API_KEY = '2nvms11dslnngrljimctrmszuebr1j7gwqnxwpdlf01y6ckc';
 	let editor: any = null;
-	let tinymce: any = null;
+	let tinymce: any = null; // will reference window.tinymce when loaded
 
-	// Load TinyMCE only on client side
-	onMount(async () => {
-		if (browser) {
-			tinymce = (await import('tinymce')).default;
-		}
-	});
+	function loadScript(src: string) {
+		return new Promise<void>((resolve, reject) => {
+			const existing = document.querySelector(`script[src="${src}"]`);
+			if (existing) {
+				existing.addEventListener('load', () => resolve());
+				existing.addEventListener('error', () => reject(new Error('Failed to load script')));
+				return;
+			}
+			const s = document.createElement('script');
+			s.src = src;
+			s.referrerPolicy = 'origin';
+			s.onload = () => resolve();
+			s.onerror = () => reject(new Error('Failed to load script'));
+			document.head.appendChild(s);
+		});
+	}
 
 	async function initTinyMCE() {
-		// Only initialize on client side and if tinymce is loaded
-		if (!browser || !tinymce) return;
+		if (!browser) return; // never run on server
+
+		// If a global tinymce already exists (maybe from another script), use it
+		if ((window as any).tinymce) {
+			tinymce = (window as any).tinymce;
+		}
+
+		// Prefer dynamic imports from the npm package so Vite bundles plugins/themes/icons
+		if (!tinymce) {
+			try {
+				// Core
+				await import('tinymce/tinymce');
+				// Icons & theme
+				await import('tinymce/icons/default');
+				await import('tinymce/themes/silver');
+				// Skin CSS (UI and content)
+				await import('tinymce/skins/ui/oxide/skin.min.css');
+				await import('tinymce/skins/content/default/content.min.css');
+
+				// Plugins we use
+				const plugins = [
+					'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+					'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+					'insertdatetime', 'media', 'table', 'help', 'wordcount',
+					'emoticons', 'paste', 'textcolor', 'colorpicker'
+				];
+
+				await Promise.all(plugins.map(p => import(`tinymce/plugins/${p}/plugin`)));
+
+				// Now the tinymce global should be present
+				if ((window as any).tinymce) tinymce = (window as any).tinymce;
+			} catch (err) {
+				// If bundling/importing fails (module not found), fall back to CDN loader
+				console.warn('npm-based TinyMCE import failed, falling back to CDN:', err);
+				try {
+					const cdn = `https://cdn.tiny.cloud/1/${TINYMCE_API_KEY}/tinymce/6/tinymce.min.js`;
+					await loadScript(cdn);
+					if ((window as any).tinymce) tinymce = (window as any).tinymce;
+				} catch (cdnErr) {
+					console.error('Failed to load TinyMCE from CDN as fallback', cdnErr);
+				}
+			}
+		}
+
+		// Only initialize if tinymce is available
+		if (!tinymce) return;
 
 		// Remove any existing editor instance
 		if (editor) {
 			tinymce.remove('#lesson-content-editor');
 		}
 
-		tinymce.init({
+			tinymce.init({
 			selector: '#lesson-content-editor',
 			apiKey: '2nvms11dslnngrljimctrmszuebr1j7gwqnxwpdlf01y6ckc',
 			height: 500,
@@ -94,16 +149,40 @@
 			image_title: true,
 			link_default_target: '_blank',
 			link_assume_external_targets: true,
-			setup: (ed: any) => {
-				editor = ed;
-				ed.on('change', () => {
-					if (selectedLesson) {
-						selectedLesson.content = ed.getContent();
+				/* called when the editor instance is created and ready */
+				init_instance_callback: (ed: any) => {
+					console.log('[lessons] tinymce instance ready', ed.id);
+					// ensure the editor has the lesson content
+					try {
+						ed.setContent(selectedLesson?.content || '');
+						console.log('[lessons] tinymce setContent called (init_callback)');
+					} catch (e) {
+						console.warn('[lessons] tinymce failed to set content in init callback', e);
 					}
-				});
-			}
+				},
+				setup: (ed: any) => {
+					editor = ed;
+					console.log('[lessons] tinymce setup, editor assigned');
+					ed.on('init', () => {
+						console.log('[lessons] editor init event');
+						// safe guard: set content when the editor fires its init event
+						try {
+							ed.setContent(selectedLesson?.content || '');
+							console.log('[lessons] tinymce setContent called (init event)');
+						} catch (e) {
+							console.warn('[lessons] tinymce failed to set content on init event', e);
+						}
+					});
+					ed.on('change', () => {
+						if (selectedLesson) {
+							selectedLesson.content = ed.getContent();
+						}
+					});
+				}
 		});
-	}	function updateEditorContent(content: string) {
+	}
+
+	function updateEditorContent(content: string) {
 		if (editor) {
 			editor.setContent(content || '');
 		}
@@ -117,11 +196,19 @@
 			// Check if element exists
 			const editorElement = document.getElementById('lesson-content-editor');
 			if (editorElement) {
-				// Small delay to ensure element is fully rendered
-				setTimeout(() => {
-					initTinyMCE();
+				console.log('[lessons] initializing TinyMCE...');
+				await initTinyMCE();
+				// wait for the editor instance to be assigned by the setup/init callbacks
+				const start = Date.now();
+				while (!editor && Date.now() - start < 3000) {
+					await new Promise((r) => setTimeout(r, 50));
+				}
+				if (editor) {
+					console.log('[lessons] editor available after init, setting content');
 					updateEditorContent(selectedLesson.content);
-				}, 50);
+				} else {
+					console.warn('[lessons] editor did not become available within timeout');
+				}
 			}
 		}
 	}
@@ -332,8 +419,18 @@ function cancelEdit() {
 						<input id="lesson-slug" class="form-control" bind:value={selectedLesson.slug} required />
 					</div>
 					<div class="mb-2">
-						<label>Content</label>
-						<div id="lesson-content-editor"></div>
+						<label for="lesson-content-editor">Content</label>
+						{#if browser}
+							<!-- The editor container must exist on the client so TinyMCE can attach to it -->
+							<div id="lesson-content-editor"></div>
+							<!-- Keep a fallback textarea visible until the editor instance is ready so users can still edit -->
+							{#if !editor}
+								<textarea id="lesson-content-fallback" class="form-control" bind:value={selectedLesson.content} rows="10"></textarea>
+							{/if}
+						{:else}
+							<!-- SSR fallback: render textarea for server-side rendered pages -->
+							<textarea id="lesson-content-fallback" class="form-control" bind:value={selectedLesson.content} rows="10"></textarea>
+						{/if}
 					</div>
 					<div class="mb-2">
 						<label for="lesson-order">Order Index</label>
