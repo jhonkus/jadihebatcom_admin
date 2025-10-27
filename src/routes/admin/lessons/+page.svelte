@@ -8,6 +8,7 @@
 	const TINYMCE_API_KEY = '2nvms11dslnngrljimctrmszuebr1j7gwqnxwpdlf01y6ckc';
 	let editor: any = null;
 	let tinymce: any = null; // will reference window.tinymce when loaded
+	let quillLib: any = null;
 
 	function loadScript(src: string) {
 		return new Promise<void>((resolve, reject) => {
@@ -24,6 +25,74 @@
 			s.onerror = () => reject(new Error('Failed to load script'));
 			document.head.appendChild(s);
 		});
+	}
+
+	// Initialize Quill editor (client-side only)
+	async function initQuill() {
+		if (!browser) return;
+		// Remove any previous content from the container
+		try {
+			const prev = document.getElementById('lesson-content-editor');
+			if (prev) prev.innerHTML = '';
+		} catch (e) {
+			console.warn('[lessons] failed to clear editor container', e);
+		}
+
+		// Dynamic import Quill and its CSS
+		try {
+			const mod = await import('quill');
+			quillLib = mod.default || mod;
+			await import('quill/dist/quill.snow.css');
+		} catch (e) {
+			console.error('[lessons] failed to load Quill', e);
+			return;
+		}
+
+		const el = document.getElementById('lesson-content-editor');
+		if (!el) {
+			console.warn('[lessons] Quill container missing');
+			return;
+		}
+
+		const options = {
+			theme: 'snow',
+			modules: {
+				toolbar: [
+					[{ header: [1, 2, 3, false] }],
+					['bold', 'italic', 'underline', 'strike'],
+					[{ color: [] }, { background: [] }],
+					[{ list: 'ordered' }, { list: 'bullet' }],
+					['link', 'image', 'code-block'],
+					['clean']
+				]
+			}
+		};
+
+		try {
+			editor = new quillLib(el, options);
+			console.log('[lessons] Quill initialized');
+
+			// set content if present
+			try {
+				if (selectedLesson?.content) {
+					editor.clipboard.dangerouslyPasteHTML(selectedLesson.content);
+				}
+			} catch (e) {
+				console.warn('[lessons] failed to set initial Quill content', e);
+			}
+
+			// sync back to selectedLesson
+			editor.on('text-change', () => {
+				try {
+					selectedLesson.content = el.querySelector('.ql-editor')?.innerHTML || '';
+				} catch (err) {
+					console.warn('[lessons] error reading Quill content', err);
+				}
+			});
+		} catch (e) {
+			console.error('[lessons] could not create Quill instance', e);
+			editor = null;
+		}
 	}
 
 	async function initTinyMCE() {
@@ -196,30 +265,47 @@
 			// Check if element exists
 			const editorElement = document.getElementById('lesson-content-editor');
 			if (editorElement) {
-				console.log('[lessons] initializing TinyMCE...');
-				await initTinyMCE();
-				// wait for the editor instance to be assigned by the setup/init callbacks
-				const start = Date.now();
-				while (!editor && Date.now() - start < 3000) {
-					await new Promise((r) => setTimeout(r, 50));
-				}
+				console.log('[lessons] initializing Quill...');
+				await initQuill();
+				// wait a short moment for Quill to initialize
+				await new Promise((r) => setTimeout(r, 50));
 				if (editor) {
-					console.log('[lessons] editor available after init, setting content');
-					updateEditorContent(selectedLesson.content);
+					console.log('[lessons] Quill ready — setting content (if not already set)');
+					try { updateEditorContent(selectedLesson.content); } catch (e) { /* ignore */ }
 				} else {
-					console.warn('[lessons] editor did not become available within timeout');
+					console.warn('[lessons] Quill did not initialize');
 				}
 			}
 		}
 	}
 
-	// Clean up TinyMCE when edit mode is deactivated
+	// Clean up editor when edit mode is deactivated
 	function cleanupEditor() {
-		if (!editMode && editor && browser && tinymce) {
-			tinymce.remove('#lesson-content-editor');
-			editor = null;
+		if (!editMode && browser) {
+			// If Quill was used, clear the container and drop reference
+			try {
+				if (editor && typeof editor.root !== 'undefined') {
+					const el = document.getElementById('lesson-content-editor');
+					if (el) el.innerHTML = '';
+					editor = null;
+					console.log('[lessons] Quill editor cleaned up');
+				}
+			} catch (e) {
+				console.warn('[lessons] error during Quill cleanup', e);
+			}
+
+			// Also handle TinyMCE if present
+			if (typeof (window as any).tinymce !== 'undefined') {
+				try {
+					(window as any).tinymce.remove('#lesson-content-editor');
+					console.log('[lessons] TinyMCE removed during cleanup');
+				} catch (e) {
+					/* ignore */
+				}
+			}
 		}
-	}	let categories: Category[] = [];
+	}
+	let categories: Category[] = [];
 let loading = true;
 let error: string | null = null;
 let selectedCategoryIndex = -1;
