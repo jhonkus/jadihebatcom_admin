@@ -220,13 +220,35 @@ async function saveLesson() {
 	if (!selectedLesson) return;
 	loading = true;
 	try {
+		// Ensure we capture the latest editor content before sending
+		try {
+			if (editor) {
+				const el = document.getElementById('lesson-content-editor');
+				// prefer Quill's root HTML if available
+				selectedLesson.content =
+					(el?.querySelector('.ql-editor') as HTMLElement | null)?.innerHTML ||
+					(editor.root && editor.root.innerHTML) ||
+					selectedLesson.content || '';
+			}
+		} catch (syncErr) {
+			console.warn('[lessons] failed to read editor content before save', syncErr);
+		}
 		const method = selectedLesson.id ? 'PUT' : 'POST';
 		const res = await fetch('/api/lessons', {
 			method,
 			body: JSON.stringify(selectedLesson),
 			headers: { 'Content-Type': 'application/json' }
 		});
-		if (!res.ok) throw new Error('Failed to save lesson');
+		if (!res.ok) {
+			let msg = 'Failed to save lesson';
+			try {
+				const body = await res.json();
+				if (body?.error) msg = body.error;
+			} catch (e) {
+				// ignore parse error
+			}
+			throw new Error(msg);
+		}
 		// Refresh hierarchy
 		categories = await fetchLessonHierarchy();
 		selectedLesson = null;
