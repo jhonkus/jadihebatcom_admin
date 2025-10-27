@@ -4,33 +4,13 @@
 	import { fetchLessonHierarchy } from '$lib/services/lessonAdminService';
 	import { browser } from '$app/environment';
 
-	// TinyMCE configuration
-	const TINYMCE_API_KEY = '2nvms11dslnngrljimctrmszuebr1j7gwqnxwpdlf01y6ckc';
 	let editor: any = null;
-	let tinymce: any = null; // will reference window.tinymce when loaded
 	let quillLib: any = null;
-
-	function loadScript(src: string) {
-		return new Promise<void>((resolve, reject) => {
-			const existing = document.querySelector(`script[src="${src}"]`);
-			if (existing) {
-				existing.addEventListener('load', () => resolve());
-				existing.addEventListener('error', () => reject(new Error('Failed to load script')));
-				return;
-			}
-			const s = document.createElement('script');
-			s.src = src;
-			s.referrerPolicy = 'origin';
-			s.onload = () => resolve();
-			s.onerror = () => reject(new Error('Failed to load script'));
-			document.head.appendChild(s);
-		});
-	}
 
 	// Initialize Quill editor (client-side only)
 	async function initQuill() {
 		if (!browser) return;
-		// Remove any previous content from the container
+		// Clear any previous editor container content
 		try {
 			const prev = document.getElementById('lesson-content-editor');
 			if (prev) prev.innerHTML = '';
@@ -95,214 +75,30 @@
 		}
 	}
 
-	async function initTinyMCE() {
-		if (!browser) return; // never run on server
-
-		// If a global tinymce already exists (maybe from another script), use it
-		if ((window as any).tinymce) {
-			tinymce = (window as any).tinymce;
-		}
-
-		// Prefer dynamic imports from the npm package so Vite bundles plugins/themes/icons
-		if (!tinymce) {
-			try {
-				// Core
-				await import('tinymce/tinymce');
-				// Icons & theme
-				await import('tinymce/icons/default');
-				await import('tinymce/themes/silver');
-				// Skin CSS (UI and content)
-				await import('tinymce/skins/ui/oxide/skin.min.css');
-				await import('tinymce/skins/content/default/content.min.css');
-
-				// Plugins we use
-				const plugins = [
-					'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-					'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-					'insertdatetime', 'media', 'table', 'help', 'wordcount',
-					'emoticons', 'paste', 'textcolor', 'colorpicker'
-				];
-
-				await Promise.all(plugins.map(p => import(`tinymce/plugins/${p}/plugin`)));
-
-				// Now the tinymce global should be present
-				if ((window as any).tinymce) tinymce = (window as any).tinymce;
-			} catch (err) {
-				// If bundling/importing fails (module not found), fall back to CDN loader
-				console.warn('npm-based TinyMCE import failed, falling back to CDN:', err);
-				try {
-					const cdn = `https://cdn.tiny.cloud/1/${TINYMCE_API_KEY}/tinymce/6/tinymce.min.js`;
-					await loadScript(cdn);
-					if ((window as any).tinymce) tinymce = (window as any).tinymce;
-				} catch (cdnErr) {
-					console.error('Failed to load TinyMCE from CDN as fallback', cdnErr);
-				}
-			}
-		}
-
-		// Only initialize if tinymce is available
-		if (!tinymce) return;
-
-		// Remove any existing editor instance
-		if (editor) {
-			tinymce.remove('#lesson-content-editor');
-		}
-
-			tinymce.init({
-			selector: '#lesson-content-editor',
-			apiKey: '2nvms11dslnngrljimctrmszuebr1j7gwqnxwpdlf01y6ckc',
-			height: 500,
-			menubar: false,
-			plugins: [
-				'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-				'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-				'insertdatetime', 'media', 'table', 'help', 'wordcount',
-				'emoticons', 'paste', 'textcolor', 'colorpicker'
-			],
-			toolbar: 'undo redo | blocks | ' +
-				'bold italic underline strikethrough | forecolor backcolor | ' +
-				'alignleft aligncenter alignright alignjustify | ' +
-				'bullist numlist outdent indent | ' +
-				'link image media table | ' +
-				'code | ' +
-				'emoticons charmap | ' +
-				'removeformat fullscreen preview help',
-			content_style: `
-				body {
-					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-					font-size: 14px;
-					line-height: 1.6;
-					color: #374151;
-				}
-				h1, h2, h3, h4, h5, h6 {
-					color: #111827;
-					font-weight: 600;
-					margin-top: 1.5em;
-					margin-bottom: 0.5em;
-				}
-				h1 { font-size: 2em; }
-				h2 { font-size: 1.5em; }
-				h3 { font-size: 1.25em; }
-				p { margin-bottom: 1em; }
-				blockquote {
-					border-left: 4px solid #e5e7eb;
-					padding-left: 1em;
-					margin: 1em 0;
-					color: #6b7280;
-					font-style: italic;
-				}
-				code {
-					background: #f3f4f6;
-					padding: 0.125em 0.25em;
-					border-radius: 0.25em;
-					font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-					font-size: 0.875em;
-				}
-				pre {
-					background: #f3f4f6;
-					padding: 1em;
-					border-radius: 0.5em;
-					overflow-x: auto;
-					margin: 1em 0;
-				}
-				pre code {
-					background: none;
-					padding: 0;
-				}
-			`,
-			placeholder: 'Start writing your lesson content...',
-			branding: false,
-			promotion: false,
-			paste_data_images: true,
-			image_advtab: true,
-			image_title: true,
-			link_default_target: '_blank',
-			link_assume_external_targets: true,
-				/* called when the editor instance is created and ready */
-				init_instance_callback: (ed: any) => {
-					console.log('[lessons] tinymce instance ready', ed.id);
-					// ensure the editor has the lesson content
-					try {
-						ed.setContent(selectedLesson?.content || '');
-						console.log('[lessons] tinymce setContent called (init_callback)');
-					} catch (e) {
-						console.warn('[lessons] tinymce failed to set content in init callback', e);
-					}
-				},
-				setup: (ed: any) => {
-					editor = ed;
-					console.log('[lessons] tinymce setup, editor assigned');
-					ed.on('init', () => {
-						console.log('[lessons] editor init event');
-						// safe guard: set content when the editor fires its init event
-						try {
-							ed.setContent(selectedLesson?.content || '');
-							console.log('[lessons] tinymce setContent called (init event)');
-						} catch (e) {
-							console.warn('[lessons] tinymce failed to set content on init event', e);
-						}
-					});
-					ed.on('change', () => {
-						if (selectedLesson) {
-							selectedLesson.content = ed.getContent();
-						}
-					});
-				}
-		});
-	}
-
-	function updateEditorContent(content: string) {
-		if (editor) {
-			editor.setContent(content || '');
-		}
-	}
-
-	// Initialize TinyMCE when edit mode is activated
+	// Entry point for initializing the editor after Svelte state updates
 	async function initializeEditor() {
-		if (editMode && selectedLesson) {
-			// Wait for DOM to update
-			await tick();
-			// Check if element exists
-			const editorElement = document.getElementById('lesson-content-editor');
-			if (editorElement) {
-				console.log('[lessons] initializing Quill...');
-				await initQuill();
-				// wait a short moment for Quill to initialize
-				await new Promise((r) => setTimeout(r, 50));
-				if (editor) {
-					console.log('[lessons] Quill ready — setting content (if not already set)');
-					try { updateEditorContent(selectedLesson.content); } catch (e) { /* ignore */ }
-				} else {
-					console.warn('[lessons] Quill did not initialize');
-				}
-			}
-		}
+		if (!browser) return;
+		await tick();
+		await initQuill();
 	}
 
-	// Clean up editor when edit mode is deactivated
+	// Cleanup any editor instances and leftover artifacts
 	function cleanupEditor() {
-		if (!editMode && browser) {
-			// If Quill was used, clear the container and drop reference
-			try {
-				if (editor && typeof editor.root !== 'undefined') {
-					const el = document.getElementById('lesson-content-editor');
-					if (el) el.innerHTML = '';
-					editor = null;
-					console.log('[lessons] Quill editor cleaned up');
-				}
-			} catch (e) {
-				console.warn('[lessons] error during Quill cleanup', e);
-			}
-
-			// Also handle TinyMCE if present
-			if (typeof (window as any).tinymce !== 'undefined') {
+		try {
+			const el = document.getElementById('lesson-content-editor');
+			if (editor) {
 				try {
-					(window as any).tinymce.remove('#lesson-content-editor');
-					console.log('[lessons] TinyMCE removed during cleanup');
+					if (typeof editor.disable === 'function') editor.disable();
 				} catch (e) {
 					/* ignore */
 				}
 			}
+			if (el) el.innerHTML = '';
+			editor = null;
+
+			// nothing else to cleanup
+		} catch (e) {
+			console.warn('[lessons] cleanupEditor error', e);
 		}
 	}
 	let categories: Category[] = [];
@@ -507,7 +303,7 @@ function cancelEdit() {
 					<div class="mb-2">
 						<label for="lesson-content-editor">Content</label>
 						{#if browser}
-							<!-- The editor container must exist on the client so TinyMCE can attach to it -->
+							<!-- The editor container must exist on the client so the rich editor (Quill) can attach to it -->
 							<div id="lesson-content-editor"></div>
 							<!-- Keep a fallback textarea visible until the editor instance is ready so users can still edit -->
 							{#if !editor}
@@ -558,28 +354,12 @@ function cancelEdit() {
 	box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 
-/* TinyMCE Custom Styling */
-:global(.tox-tinymce) {
+/* Editor custom styling (Quill) */
+:global(.ql-toolbar) {
+	border-bottom: 1px solid #e5e7eb !important;
+}
+:global(.ql-container) {
 	border: 1px solid #d1d5db !important;
 	border-radius: 0.5rem !important;
-	box-shadow: none !important;
-}
-:global(.tox-tinymce:focus-within) {
-	border-color: #6366f1 !important;
-	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
-}
-:global(.tox .tox-toolbar) {
-	border-bottom: 1px solid #e5e7eb !important;
-	background: #f9fafb !important;
-}
-:global(.tox .tox-toolbar button) {
-	color: #374151 !important;
-}
-:global(.tox .tox-toolbar button:hover) {
-	background: #e5e7eb !important;
-}
-:global(.tox .tox-toolbar button[aria-pressed="true"]) {
-	background: #6366f1 !important;
-	color: white !important;
 }
 </style>
