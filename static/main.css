@@ -1,0 +1,647 @@
+/* custom-styles.css - Bootstrap 5 Override untuk SvelteKit */
+
+/* ==================== CSS Custom Properties for Theming (Learning Interface Only) ==================== */
+/* Only apply theming to learning routes */
+.enable-theming {
+  /* Light Theme Variables */
+  --theme-bg: #ffffff;
+  --theme-bg-secondary: #f8fafc;
+  --theme-bg-tertiary: #f1f5f9;
+  --theme-surface: #ffffff;
+  --theme-surface-secondary: #f8fafc;
+  --theme-surface-hover: #f1f5f9;
+  
+  --theme-text: #1e293b;
+  --theme-text-secondary: #475569;
+  --theme-text-muted: #64748b;
+  --theme-text-inverse: #ffffff;
+  
+  --theme-border: #e2e8f0;
+  --theme-border-secondary: #cbd5e1;
+  --theme-border-hover: #94a3b8;
+  
+  --theme-shadow: rgba(0, 0, 0, 0.1);
+  --theme-shadow-lg: rgba(0, 0, 0, 0.15);
+  --theme-glow: rgba(59, 130, 246, 0.3);
+  
+  /* Learning Interface Specific */
+  --learning-bg: #ffffff;
+  --learning-content-bg: #ffffff;
+  --learning-sidebar-bg: #f8fafc;
+  --learning-header-bg: rgba(255, 255, 255, 0.95);
+  --learning-progress-track: #f1f5f9;
+  --learning-progress-fill: #3b82f6;
+  
+  /* Markdown Content Variables */
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --bg-secondary: #f8fafc;
+  --primary-color: #3b82f6;
+  --code-bg: #1e293b;
+  --code-inline-bg: #f1f5f9;
+  --code-inline-text: #dc2626;
+  
+  /* Badge Variables */
+  --badge-info-bg: #eff6ff;
+  --badge-info-bg-alt: #dbeafe;
+  --badge-info-text: #1e40af;
+  --badge-info-border: #bfdbfe;
+  --badge-info-icon: #3b82f6;
+  --badge-success-bg: #f0fdf4;
+  --badge-success-bg-alt: #dcfce7;
+  --badge-success-text: #166534;
+  --badge-success-border: #bbf7d0;
+  --badge-success-icon: #10b981;
+  --badge-error-bg: #fef2f2;
+  --badge-error-text: #991b1b;
+  --badge-error-icon: #ef4444;
+}
+
+/* Dark Theme Variables - Only when theming is enabled */
+[data-theme="dark"] .enable-theming {
+  --theme-bg: #0f172a;
+  --theme-bg-secondary: #1e293b;
+  --theme-bg-tertiary: #334155;
+  --theme-surface: #1e293b;
+  --theme-surface-secondary: #334155;
+  --theme-surface-hover: #475569;
+  
+  --theme-text: #f1f5f9;
+  --theme-text-secondary: #cbd5e1;
+  --theme-text-muted: #94a3b8;
+  --theme-text-inverse: #0f172a;
+  
+  --theme-border: #334155;
+  --theme-border-secondary: #475569;
+  --theme-border-hover: #64748b;
+  
+  --theme-shadow: rgba(0, 0, 0, 0.3);
+  --theme-shadow-lg: rgba(0, 0, 0, 0.5);
+  --theme-glow: rgba(59, 130, 246, 0.4);
+  
+  /* Learning Interface Dark Mode */
+  --learning-bg: #0f172a;
+  --learning-content-bg: #1e293b;
+  --learning-sidebar-bg: #1e293b;
+  --learning-header-bg: rgba(30, 41, 59, 0.95);
+  --learning-progress-track: #334155;
+  --learning-progress-fill: #60a5fa;
+  
+  /* Markdown Content Dark Mode Variables */
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --bg-secondary: #334155;
+  --primary-color: #60a5fa;
+  --code-bg: #0f172a;
+  --code-inline-bg: #334155;
+  --code-inline-text: #fbbf24;
+  
+  /* Badge Dark Mode Variables */
+  --badge-info-bg: #1e293b;
+  --badge-info-bg-alt: #334155;
+  --badge-info-text: #93c5fd;
+  --badge-info-border: #475569;
+  --badge-info-icon: #60a5fa;
+  --badge-success-bg: #064e3b;
+  --badge-success-bg-alt: #065f46;
+  --badge-success-text: #6ee7b7;
+  --badge-success-border: #047857;
+  --badge-success-icon: #34d399;
+  --badge-error-bg: #7f1d1d;
+  --badge-error-text: #fca5a5;
+  --badge-error-icon: #f87171;
+}
+
+/* ==================== Bootstrap CSS Variables Override ==================== */
+:root {
+  /* Primary Color Palette - Professional & Accessible */
+  --bs-primary: #2563eb;
+  --bs-primary-rgb: 37, 99, 235;
+  --bs-secondary: #475569;
+  --bs-secondary-rgb: 71, 85, 105;
+  --bs-success: #10b981;
+  --bs-success-rgb: 16, 185, 129;
+  --bs-info: #06b6d4;
+  --bs-info-rgb: 6, 182, 212;
+  --bs-warning: #f59e0b;
+  --bs-warning-rgb: 245, 158, 11;
+  --bs-danger: #ef4444;
+  --bs-danger-rgb: 239, 68, 68;
+  --bs-light: #f8fafc;
+  --bs-light-rgb: 248, 250, 252;
+  --bs-dark: #1e293b;
+  --bs-dark-rgb: 30, 41, 59;
+  
+  /* Extended Color Palette - Harmonious tones */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+  
+  /* Accent colors that complement the primary blue */
+  --color-accent: #f59e0b;
+  --color-accent-rgb: 245, 158, 11;
+  --color-accent-50: #fffbeb;
+  --color-accent-100: #fef3c7;
+  --color-accent-200: #fde68a;
+  --color-accent-300: #fcd34d;
+  --color-accent-400: #fbbf24;
+  --color-accent-500: #f59e0b;
+  --color-accent-600: #d97706;
+  --color-accent-700: #b45309;
+  --color-accent-800: #92400e;
+  --color-accent-900: #78350f;
+  
+  /* Neutral Gray Scale - Cool tones that work with blue */
+  --bs-gray-100: #f1f5f9;
+  --bs-gray-200: #e2e8f0;
+  --bs-gray-300: #cbd5e1;
+  --bs-gray-400: #94a3b8;
+  --bs-gray-500: #64748b;
+  --bs-gray-600: #475569;
+  --bs-gray-700: #334155;
+  --bs-gray-800: #1e293b;
+  --bs-gray-900: #0f172a;
+  
+  /* Border radius */
+  --bs-border-radius: 0.5rem;
+  --bs-border-radius-sm: 0.375rem;
+  --bs-border-radius-lg: 0.75rem;
+  --bs-border-radius-xl: 1rem;
+  --bs-border-radius-pill: 50rem;
+  
+  /* Border width */
+  --bs-border-width: 1px;
+  --bs-border-color: var(--bs-gray-200);
+  
+  /* Typography */
+  --bs-body-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --bs-body-font-size: 1rem;
+  --bs-body-font-weight: 400;
+  --bs-body-line-height: 1.6;
+  --bs-body-color: var(--bs-gray-800);
+  --bs-body-bg: #ffffff;
+  
+  /* Headings */
+  --bs-heading-color: var(--bs-gray-900);
+  
+  /* Links */
+  --bs-link-color: var(--bs-primary);
+  --bs-link-hover-color: var(--color-primary-700);
+  
+  /* Code */
+  --bs-code-color: var(--bs-primary);
+}
+
+/* ==================== NO SHADOWS (Flat Design) ==================== */
+.shadow,
+.shadow-sm,
+.shadow-lg,
+.dropdown-menu,
+.modal-content,
+.popover,
+.card,
+.btn,
+.form-control,
+.form-select,
+.alert,
+.toast,
+.offcanvas {
+  box-shadow: none !important;
+}
+
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+  box-shadow: 0 0 0 2px var(--color-primary-100) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+/* ==================== Typography Enhancements ==================== */
+body {
+  font-family: var(--bs-body-font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--bs-heading-color);
+}
+
+h1 { color: var(--bs-gray-900); }
+h2 { color: var(--bs-gray-800); }
+h3 { color: var(--bs-gray-700); }
+
+p {
+  line-height: 1.75;
+  color: var(--bs-gray-700);
+}
+
+.lead {
+  color: var(--bs-gray-600);
+  font-size: 1.125rem;
+}
+
+/* ==================== Button Enhancements ==================== */
+.btn {
+  font-weight: 600;
+  border-width: var(--bs-border-width);
+  padding: 0.625rem 1.5rem;
+  transition: all 0.2s ease-in-out;
+  border-radius: var(--bs-border-radius);
+}
+
+.btn-primary {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: white;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bs-gray-600);
+  border-color: var(--bs-gray-600);
+}
+
+/* Accent button */
+.btn-accent {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--bs-gray-900);
+  font-weight: 600;
+}
+
+.btn-accent:hover,
+.btn-accent:focus {
+  background-color: var(--color-accent-600);
+  border-color: var(--color-accent-600);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+  border-width: 2px;
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: white;
+}
+
+.btn-outline-accent {
+  border-width: 2px;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: transparent;
+}
+
+.btn-outline-accent:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--bs-gray-900);
+}
+
+/* ==================== Card Enhancements ==================== */
+.card {
+  border-width: var(--bs-border-width);
+  border-color: var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.card:hover {
+  border-color: var(--bs-gray-300);
+}
+
+.card-course {
+  border-width: 2px;
+  border-color: var(--bs-gray-200);
+}
+
+.card-course:hover {
+  border-color: var(--bs-primary);
+  transform: translateY(-4px);
+}
+
+.card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--bs-border-color);
+  font-weight: 600;
+  color: var(--bs-gray-800);
+  padding: 1.25rem 1.5rem;
+}
+
+.card-footer {
+  background-color: transparent;
+  border-top: 1px solid var(--bs-border-color);
+  padding: 1.25rem 1.5rem;
+}
+
+.card-title {
+  color: var(--bs-gray-900);
+  font-weight: 700;
+}
+
+.card-text {
+  color: var(--bs-gray-600);
+}
+
+/* ==================== Form Enhancements ==================== */
+.form-control,
+.form-select {
+  border-width: var(--bs-border-width);
+  border-color: var(--bs-border-color);
+  padding: 0.75rem 1rem;
+  transition: all 0.15s ease;
+  border-radius: var(--bs-border-radius);
+  background-color: white;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--bs-primary);
+  background-color: white;
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--bs-gray-700);
+  margin-bottom: 0.5rem;
+}
+
+.form-text {
+  color: var(--bs-gray-500);
+}
+
+/* ==================== Badge Enhancements ==================== */
+.badge {
+  font-weight: 600;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--bs-border-radius-pill);
+  font-size: 0.75rem;
+}
+
+.badge-primary {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-800);
+}
+
+.badge-accent {
+  background-color: var(--color-accent-100);
+  color: var(--color-accent-800);
+}
+
+.badge-success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* ==================== Alert Enhancements ==================== */
+.alert {
+  border-width: var(--bs-border-width);
+  border-radius: var(--bs-border-radius);
+  border-left-width: 4px;
+}
+
+.alert-primary {
+  border-left-color: var(--bs-primary);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-800);
+  border-color: var(--color-primary-200);
+}
+
+.alert-success {
+  border-left-color: var(--bs-success);
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.alert-warning {
+  border-left-color: var(--bs-warning);
+  background-color: #fffbeb;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.alert-danger {
+  border-left-color: var(--bs-danger);
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+/* ==================== Progress Bar for Courses ==================== */
+.progress {
+  height: 8px;
+  border-radius: var(--bs-border-radius-pill);
+  background-color: var(--bs-gray-200);
+  overflow: hidden;
+}
+
+.progress-bar {
+  border-radius: var(--bs-border-radius-pill);
+  background-color: var(--bs-primary);
+  transition: width 0.6s ease;
+}
+
+/* ==================== Navigation Enhancements ==================== */
+.navbar {
+  padding: 1rem 0;
+  background-color: white;
+  border-bottom: 1px solid var(--bs-gray-200);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1030;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--bs-gray-900) !important;
+}
+
+.nav-link {
+  font-weight: 500;
+  transition: color 0.15s ease;
+  color: var(--bs-gray-600) !important;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--bs-primary) !important;
+}
+
+.nav-link.active {
+  color: var(--bs-primary) !important;
+  font-weight: 600;
+}
+
+/* ==================== Custom Utilities ==================== */
+.text-accent {
+  color: var(--color-accent) !important;
+}
+
+.text-muted {
+  color: var(--color-accent-50) !important;
+}
+
+.text-white {
+  color: var(--color-primary-50) !important;
+}
+
+.bg-accent {
+  background-color: var(--color-accent) !important;
+}
+
+.border-accent {
+  border-color: var(--color-accent) !important;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--bs-primary) 0%, var(--color-primary-700) 100%);
+}
+
+.bg-light-accent {
+  background-color: var(--color-accent-50) !important;
+}
+
+/* ==================== Table Enhancements ==================== */
+.table {
+  border-color: var(--bs-border-color);
+}
+
+.table th {
+  background-color: var(--bs-gray-50);
+  color: var(--bs-gray-700);
+  font-weight: 600;
+  border-color: var(--bs-gray-200);
+}
+
+.table td {
+  border-color: var(--bs-gray-100);
+  color: var(--bs-gray-600);
+}
+
+/* ==================== Code & Pre Styling ==================== */
+code {
+  background-color: var(--bs-gray-100);
+  color: var(--bs-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--bs-border-radius-sm);
+  font-size: 0.875em;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+pre {
+  background-color: var(--bs-gray-900);
+  color: var(--bs-gray-100);
+  padding: 1.5rem;
+  border-radius: var(--bs-border-radius-lg);
+  overflow-x: auto;
+  border-left: 4px solid var(--bs-primary);
+}
+
+pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* ==================== Blockquote ==================== */
+blockquote {
+  border-left: 4px solid var(--bs-primary);
+  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  color: var(--bs-gray-600);
+  font-style: italic;
+  background-color: var(--bs-gray-50);
+  padding: 1.5rem;
+  border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+}
+
+/* ==================== Responsive Design ==================== */
+@media (max-width: 768px) {
+  :root {
+    --bs-body-font-size: 0.9375rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+  }
+  
+  .card-body {
+    padding: 1.25rem;
+  }
+}
+
+/* ==================== Accessibility Improvements ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .card,
+  .form-control {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --bs-border-width: 2px;
+  }
+  
+  .btn {
+    border-width: 2px;
+  }
+}
+
+/* Dark mode support (optional future enhancement) */
+@media (prefers-color-scheme: dark) {
+  /* You can add dark mode styles here when needed */
+}
+
