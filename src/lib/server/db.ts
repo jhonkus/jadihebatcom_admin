@@ -1,14 +1,17 @@
 // PostgreSQL database client using official Supabase JS client
 // Works in both Node.js (local dev) and Cloudflare Workers (edge runtime)
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-import { SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
+// Use dynamic env access to avoid build-time errors when some env vars
+// are missing during local builds. Prefer defining these in your .env
+// for production builds so they are available as static exports.
+import { env as publicEnv } from '$env/dynamic/public';
+import { env as privateEnv } from '$env/dynamic/private';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = publicEnv.PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = publicEnv.PUBLIC_SUPABASE_ANON_KEY || '';
 
 // Use service role key for server-side operations (bypasses RLS)
-const supabaseKey = SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey;
+const supabaseKey = privateEnv.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey;
 
 // Client for server-side operations
 export const supabase = createClient(supabaseUrl, supabaseKey, {
@@ -20,13 +23,10 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 
 // Log which key type is being used (only in non-production)
 if (process.env.NODE_ENV !== 'production') {
-	if (SUPABASE_SERVICE_ROLE_KEY) {
-		// eslint-disable-next-line no-console
+	if (privateEnv.SUPABASE_SERVICE_ROLE_KEY) {
 		console.log('✅ Using Supabase service role key (bypasses RLS)');
 	} else {
-		// eslint-disable-next-line no-console
 		console.log('⚠️  Using Supabase anon key (RLS enabled - may have permission issues)');
-		// eslint-disable-next-line no-console
 		console.log('   Add SUPABASE_SERVICE_ROLE_KEY to .env for full server-side access');
 	}
 }
